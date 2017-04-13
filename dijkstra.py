@@ -1,6 +1,7 @@
 import csv
 import math
 import random
+import time
 from collections import deque
 
 class MinHeap:
@@ -100,15 +101,16 @@ class MinHeap:
     print(",".join(map((lambda n: str(n)), self.arr)))
 
 class Edge:
-  def __init__(self, cost, next):
+  def __init__(self, cost, start, end):
     self.cost = cost
-    self.next = next;
+    self.start = start
+    self.end = end
 
   def getCost(self):
     return self.cost
 
   def __str__(self):
-    return str(self.next.getNodeIdx()+1)
+    return str(self.end.getNodeIdx()+1)
 
 class Node:
   def __init__(self, nodeIdx, cost=math.inf):
@@ -139,10 +141,10 @@ class Node:
   def setCost(self, cost):
     self.cost = cost
 
-  def setPrevious(self, prev):
+  def setInEdge(self, prev):
     self.previous = prev
 
-  def getPrevious(self):
+  def getInEdge(self):
     return self.previous
 
   def setVisited(self):
@@ -159,7 +161,7 @@ class Node:
 
 # Load adjacency list
 def load_heap(start_idx):
-  print("Loading with start idx %s" % start_idx)
+  # print("Loading with start idx %s" % start_idx)
 
   adj_list = None
   with open('connectivity_matrix.csv', 'r') as file:
@@ -178,7 +180,8 @@ def load_heap(start_idx):
         cost = float(c)
         if (cost <= 1e-10): continue;
 
-        adj_list[row_idx].addEdge(Edge(cost, adj_list[col_idx]))
+        start = adj_list[row_idx]
+        start.addEdge(Edge(cost, start, adj_list[col_idx]))
 
       row_idx += 1
 
@@ -186,6 +189,8 @@ def load_heap(start_idx):
 
 # Dijkstra
 def dijkstra(heap, start_idx, end_idx):
+  time_dijkstra = time.time() # Timing
+
   node = heap.extract_min()
   start_node = node
   if (start_node.getNodeIdx() != start_idx):
@@ -195,12 +200,12 @@ def dijkstra(heap, start_idx, end_idx):
   while True:
     node.setVisited()
     for edge in node.edges:
-      next = edge.next
+      next = edge.end
       if next.isVisited(): continue
 
       # Update cost
       if (node.getCost() + edge.getCost() < next.getCost()):
-        next.setPrevious(node)
+        next.setInEdge(edge)
         heap_idx = next.getHeapIdx()
         new_cost = node.getCost() + edge.getCost()
         heap.decrease_key(heap_idx, new_cost)
@@ -212,19 +217,37 @@ def dijkstra(heap, start_idx, end_idx):
     else:
       node = heap.extract_min()
 
+  cost = 0
   res = deque()
-  node = end_node
-  while (node != start_node):
-    res.appendleft(node.getNodeIdx()+1) # Convert from idx to number
-    node = node.getPrevious()
+  
+  edge = end_node.getInEdge()
+  res.appendleft(end_node.getNodeIdx()+1)
+  while (edge.start != start_node):
+    cost += edge.getCost()
+    res.appendleft(edge.start.getNodeIdx()+1) # Convert from idx to number
+    edge = edge.start.getInEdge()
+  cost += edge.getCost()
   res.appendleft(start_node.getNodeIdx()+1) # Convert from idx to number
 
+  # Time
+  end_dijkstra = time.time()
+  # print("Elapsed time for just dijkstra was %g seconds" % (end_dijkstra - time_dijkstra))
+  
+  print("Cost = %s" % cost)
   return res
 
 # Execute
-start_node = 61
-end_node = 151
+start_node = int(input("Start node: "))
+end_node = int(input("End node: "))
 
 start_idx = start_node-1
 end_idx = end_node-1
-print(dijkstra(load_heap(start_idx), start_idx, end_idx))
+
+start_time = time.time()
+if (start_node == end_node):
+  print([ start_node ])
+else:
+  print(dijkstra(load_heap(start_idx), start_idx, end_idx))
+
+end_time = time.time()
+# print("Elapsed time was %g seconds" % (end_time - start_time))
