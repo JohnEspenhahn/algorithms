@@ -7,7 +7,7 @@ from collections import deque
 class MinHeap:
   def __init__(self, arr = []):
     self.arr = arr
-    self.build_heap()
+    self.build_heap() # build from an array
     # self.print()
 
   def insert(self, n): # ! n must be Node
@@ -36,7 +36,7 @@ class MinHeap:
       self.arr[0] = self.arr.pop().setHeapIdx(0)
       self.heapify(0)
     else:
-      self.arr.pop()
+      self.arr.pop() # If array will be empty, cannot heapify
 
     return min
 
@@ -86,6 +86,7 @@ class MinHeap:
     if (left_idx >= len(self.arr)):
       raise Exception("Index out of bounds")
 
+    # Might not have right child
     right_idx = self.right(idx)
     if (right_idx >= len(self.arr)): 
       return left_idx
@@ -128,9 +129,10 @@ class Node:
   def getHeapIdx(self):
     return self.heapIdx
 
+  # Keep track of this node's position in the heap to avoid searching in decrease_key
   def setHeapIdx(self, heap_idx):
     self.heapIdx = heap_idx
-    return self
+    return self # Return self for easier linking
 
   def addEdge(self, edge):
     self.edges.append(edge)
@@ -141,9 +143,11 @@ class Node:
   def setCost(self, cost):
     self.cost = cost
 
+  # For reconstructing shortest path
   def setInEdge(self, prev):
     self.previous = prev
 
+  # For reconstructing shortest path
   def getInEdge(self):
     return self.previous
 
@@ -176,6 +180,7 @@ def load_heap(start_idx):
           cost = (0.0 if (nodeIdx == start_idx) else 1000000)
           adj_list.append(Node(nodeIdx, cost))
 
+      # Read all edges for this node (row)
       for col_idx, c in enumerate(cols):
         cost = float(c)
         if (cost <= 1e-10): continue;
@@ -198,14 +203,14 @@ def dijkstra(heap, start_idx, end_idx):
 
   end_node = None
   while True:
-    node.setVisited()
+    node.setVisited() # make black
     for edge in node.edges:
       next = edge.end
       if next.isVisited(): continue
 
-      # Update cost
+      # Relax
       if (node.getCost() + edge.getCost() < next.getCost()):
-        next.setInEdge(edge)
+        next.setInEdge(edge) # Keep track of the shortest path
         heap_idx = next.getHeapIdx()
         new_cost = node.getCost() + edge.getCost()
         heap.decrease_key(heap_idx, new_cost)
@@ -217,6 +222,7 @@ def dijkstra(heap, start_idx, end_idx):
     else:
       node = heap.extract_min()
 
+  # Rebuild the shortest path using "inEdge" starting at the dest node
   cost = 0
   res = deque()
   

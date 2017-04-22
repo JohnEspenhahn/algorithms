@@ -1,1 +1,4 @@
 connectivity_matrix*.csv
+__pycache__/
+dist/
+build/
