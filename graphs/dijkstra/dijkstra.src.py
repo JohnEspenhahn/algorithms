@@ -2,13 +2,14 @@ import csv
 import math
 import random
 import time
+import sys
 from collections import deque
 
 class MinHeap:
   def __init__(self, arr = []):
     self.arr = arr
     self.build_heap() # build from an array
-    # self.print()
+    # self.printArr()
 
   def insert(self, n): # ! n must be Node
     self.arr.append(n)
@@ -98,7 +99,7 @@ class MinHeap:
     else:
       return right_idx
 
-  def print(self):
+  def printArr(self):
     print(",".join(map((lambda n: str(n)), self.arr)))
 
 class Edge:
@@ -157,7 +158,7 @@ class Node:
   def isVisited(self):
     return self.visited
 
-  def print(self):
+  def printArr(self):
     print(str(self.getNodeIdx()+1) + " -> " + (",".join(map((lambda e: str(e)), self.edges))))
 
   def __str__(self):
@@ -168,7 +169,7 @@ def load_heap(start_idx):
   # print("Loading with start idx %s" % start_idx)
 
   adj_list = None
-  with open('connectivity_matrix.csv', 'r') as file:
+  with open(FILENAME, 'r') as file:
     row_idx = 0
     reader = csv.reader(file)
     for cols in reader:
@@ -243,8 +244,9 @@ def dijkstra(heap, start_idx, end_idx):
   return res
 
 # Execute
-start_node = int(input("Start node: "))
-end_node = int(input("End node: "))
+start_node = int(sys.argv[0])
+end_node = int(sys.argv[1])
+FILENAME = sys.argv[2]
 
 start_idx = start_node-1
 end_idx = end_node-1
