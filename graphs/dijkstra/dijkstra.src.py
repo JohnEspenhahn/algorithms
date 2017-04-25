@@ -244,9 +244,9 @@ def dijkstra(heap, start_idx, end_idx):
   return res
 
 # Execute
-start_node = int(sys.argv[0])
-end_node = int(sys.argv[1])
-FILENAME = sys.argv[2]
+start_node = int(sys.argv[1])
+end_node = int(sys.argv[2])
+FILENAME = sys.argv[3]
 
 start_idx = start_node-1
 end_idx = end_node-1
